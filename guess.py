@@ -46,7 +46,8 @@ class CDL(nn.Module):
 
     def forward(self, x):
         x = x * self.slope.clamp(min=1e-8) + self.offset
-        x = torch.pow(x, self.power.clamp(min=1, max=1))
+        x = torch.clamp(x, min=1e-11)
+        x = torch.pow(x, self.power)
         return x
         # return torch.pow(x * self.slope + self.offset, self.power)
 
@@ -101,7 +102,7 @@ def main():
     batch = 0
     cdl.train()
 
-    print ('\n'*3)
+    print ('\n'*4)
 
     while True:
         optimizer.zero_grad()
@@ -110,7 +111,10 @@ def main():
         loss.backward()
         optimizer.step()
 
-        clear_lines(1)
+        clear_lines(4)
+        print (f'offset:\t{cdl.offset.data.squeeze()}')
+        print (f'slope:\t{cdl.slope.data.squeeze()}')
+        print (f'power:\t{cdl.power.data.squeeze()}')
         print(loss.item())
 
 if __name__ == "__main__":
